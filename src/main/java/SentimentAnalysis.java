@@ -81,5 +81,18 @@ public class SentimentAnalysis {
 
     public static void main(String[] args) throws Exception {
 
+        Configuration configuration = new Configuration();
+        configuration.set("dictionary", args[2]);  //命令行第3个参数是emotionCategory.txt
+
+        Job job = Job.getInstance();
+        job.setJarByClass(SentimentAnalysis.class); //告诉他主class
+        job.setMapperClass(SentimentSplit.class);  //告诉他mapper class
+        job.setReducerClass(SentimentCollection.class); //告诉他reducer class
+        job.setOutputKeyClass(Text.class);  //key 是string，MapReduce中用Text表示
+        job.setOutputValueClass(IntWritable.class); // value
+
+        FileInputFormat.addInputPath(job, new Path(args[0]));  //set input
+        FileOutputFormat.setOutputPath(job, new Path(args[1])); //set output path
+
     }
 }
