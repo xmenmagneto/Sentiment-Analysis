@@ -23,7 +23,7 @@ public class SentimentAnalysis {
         public Map<String, String> emotionLibrary = new HashMap<String, String>();
 
         @Override
-        public void setup(Context context) throws IOException {
+        public void setup(Context context) throws IOException { //初始化后，不再改变
             //create emotionLibrary
             //通过getConfiguration，动态的找到emotionCategory.txt的路径
             Configuration configuration = context.getConfiguration();
@@ -38,15 +38,13 @@ public class SentimentAnalysis {
                 emotionLibrary.put(word_feeling[0], word_feeling[1]);
                 line = br.readLine(); //read next line
             }
+            br.close();
         }
 
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             //key 是offset:第几篇中的第几行 -> 位置
             //value 是文章中的每一行 = line
-
-
-
 
             //read file
             //split into single words
@@ -68,7 +66,15 @@ public class SentimentAnalysis {
         //override reduce方法
         public void reduce(Text key, Iterable<IntWritable> values, Context context)
                 throws IOException, InterruptedException {
+            //收集mapper所有的数据，然后做merge
+            //key = positive
+            //value = <1,1,1,1,1,1,1,1,1...>
+            int sum = 0;
+            for (IntWritable value : values) {
+                sum += value.get();
+            }
 
+            context.write(key, new IntWritable(sum));
         }
 
     }
